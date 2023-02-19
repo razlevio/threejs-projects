@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import gsap from "gsap";
+import GUI from "lil-gui"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Material } from "three";
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -11,10 +13,16 @@ const scene = new THREE.Scene();
 // Clock
 const clock = new THREE.Clock();
 
+// Debug Panel Parameters
+const parameters = {
+    color: "#ed1fb6",
+    animationOne: animationOne,
+};
+
 // Object
 const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: "#ed1fb6" })
+    new THREE.MeshBasicMaterial({ color: parameters.color})
 );
 
 scene.add(mesh);
@@ -25,6 +33,7 @@ const sizes = {
     height: window.innerHeight,
 };
 
+// Resize Handler
 window.addEventListener("resize", () => {
     sizes.width = window.innerWidth;
     sizes.height = window.innerHeight;
@@ -37,8 +46,8 @@ window.addEventListener("resize", () => {
 
 });
 
-window.addEventListener('dblclick', () =>
-{
+// Double Click Handler
+window.addEventListener('dblclick', () => {
     const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
 
     if(!fullscreenElement)
@@ -82,8 +91,46 @@ renderer.render(scene, camera);
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true;
 
+// Debug Panel GUI
+const gui = new GUI();
 
-function cubeRightTopLeftBottom() {
+gui
+    .add(parameters, "animationOne")
+    .name("Animation 1")
+
+gui
+    .add(mesh.position, "y")
+    .min(-3)
+    .max(3)
+    .step(0.01)
+    .name("Change Vertically")
+
+gui
+    .add(mesh.position, "x")
+    .min(-3)
+    .max(3)
+    .step(0.01)
+    .name("Change Horizontally")
+
+gui
+    .add(controls, "enabled")
+    .name("Toggle Movement Option")
+
+gui
+    .add(controls, "enableDamping")
+    .name('Toggle Damping Effect')
+
+gui
+    .add(mesh.material, "wireframe")
+    .name("Toggle Wireframe")
+
+gui
+    .addColor(parameters, "color")
+    .onChange(() => {
+        mesh.material.color.set(parameters.color);
+    });
+
+function animationOne() {
     gsap.to(mesh.position, {duration: 1, delay: 1, x: 2});
     gsap.to(mesh.position, {duration: 1, delay: 2, x: 0});
     gsap.to(mesh.position, {duration: 1, delay:3, y: 2});
@@ -94,16 +141,11 @@ function cubeRightTopLeftBottom() {
     gsap.to(mesh.position, {duration: 1, delay: 8, y: 0});
 }
 
-function cubeAnimation() {
-    const elapsedTime = clock.getElapsedTime()
-    // camera.position.x = Math.cos(elapsedTime);
-    // camera.position.y = Math.sin(elapsedTime)
-    // camera.lookAt(mesh.position)
+function tick() {
     controls.update()
     renderer.render(scene, camera)
-    window.requestAnimationFrame(cubeAnimation);
-
+    window.requestAnimationFrame(tick);
 };
 
-cubeAnimation();
+tick();
 
