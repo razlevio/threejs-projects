@@ -13,16 +13,10 @@ const scene = new THREE.Scene();
 // Clock
 const clock = new THREE.Clock();
 
-// Debug Panel Parameters
-const parameters = {
-    color: "#ed1fb6",
-    animationOne: animationOne,
-};
-
-// Object
+// The Cube Object
 const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: parameters.color})
+    new THREE.MeshBasicMaterial({ color: "#ed1fb6"})
 );
 
 scene.add(mesh);
@@ -94,34 +88,41 @@ controls.enableDamping = true;
 // Debug Panel GUI
 const gui = new GUI();
 
-gui
-    .add(parameters, "animationOne")
-    .name("Animation 1")
+// Debug Panel Parameters
+const parameters = {
+    position: mesh.position,
+    color: "#ed1fb6",
+    controls: controls,
+    material: mesh.material,
+    animationOne: animationOne,
+    spinHorizontally: () => gsap.to(mesh.rotation, {duration: 1, y: mesh.rotation.y + Math.PI * 2}),
+    spinVertically: () => gsap.to(mesh.rotation, {duration: 1, x: mesh.rotation.x + Math.PI * 2}),
+};
 
 gui
-    .add(mesh.position, "y")
+    .add(parameters.position, "y")
     .min(-3)
     .max(3)
     .step(0.01)
-    .name("Change Vertically")
+    .name("Change Vertical Axes")
 
 gui
-    .add(mesh.position, "x")
+    .add(parameters.position, "x")
     .min(-3)
     .max(3)
     .step(0.01)
-    .name("Change Horizontally")
+    .name("Change Horizontal Axes")
 
 gui
-    .add(controls, "enabled")
+    .add(parameters.controls, "enabled")
     .name("Toggle Movement Option")
 
 gui
-    .add(controls, "enableDamping")
+    .add(parameters.controls, "enableDamping")
     .name('Toggle Damping Effect')
 
 gui
-    .add(mesh.material, "wireframe")
+    .add(parameters.material, "wireframe")
     .name("Toggle Wireframe")
 
 gui
@@ -129,6 +130,18 @@ gui
     .onChange(() => {
         mesh.material.color.set(parameters.color);
     });
+
+gui
+    .add(parameters, "animationOne")
+    .name("Animation 1")
+
+gui
+    .add(parameters, "spinHorizontally")
+    .name("Spin Horizontally")
+
+gui
+    .add(parameters, "spinVertically")
+    .name("Spin Vertically")
 
 function animationOne() {
     gsap.to(mesh.position, {duration: 1, delay: 1, x: 2});
